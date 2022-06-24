@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- 导入 bootstrap 的样式表 -->
+    <!-- https://v4.bootcss.com/docs/components/forms/#switches -->
+    <link rel="stylesheet" href="./lib/bootstrap.css" />
+    <style>
+      :root {
+        font-size: 13px;
+      }
+
+      body {
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <!-- 卡片区域 -->
+      <div class="card">
+        <h5 class="card-header">添加品牌</h5>
+        <div class="card-body">
+          <!-- 添加品牌的表单 -->
+          <form class="form-inline" @submit.prevent>
+            <div class="input-group mb-2 mr-sm-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">品牌名称</div>
+              </div>
+              <!-- 文本输入框 -->
+              <input type="text" class="form-control" v-model.trim="brandName" />
+            </div>
+
+            <!-- 提交表单的按钮 -->
+            <button type="submit" class="btn btn-primary mb-2" @click="addNewBrands">添加品牌</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 品牌列表 -->
+      <table class="table table-bordered table-striped mt-2">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>品牌名称</th>
+            <th>状态</th>
+            <th>创建时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <!-- 表格的主体区域 -->
+        <tbody>
+          <!-- TODO：循环渲染表格的每一行数据 -->
+          <tr v-for="(item,index) in brandsList" :key="item.id">
+            <td>{{index+1 }}</td>
+            <td>{{item.brandNames}}</td>
+            <td>
+              <div class="custom-control custom-switch">
+                <!-- 基于checkbox渲染出swith开关效果 -->
+                <input type="checkbox" class="custom-control-input" :id="item.id" v-model="item.status" />
+                <!-- swith开关后面的描述文本  -->
+                <label class="custom-control-label" :for="item.id" v-if="item.status">已启用</label>
+                <label class="custom-control-label" :for="item.id" v-else>已禁用</label>
+              </div>
+            </td>
+            <td>{{item.createTime|dateFormat}}</td>
+            <td>
+              <a href="#" @click.prevent="removeBrand(item.id)">删除</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+  <script src="./lib/vue-2.6.12.js"></script>
+  <script>
+    // 定义全局过滤器
+    Vue.filter('dateFormat', dateStr => {
+      const y = dateStr.getFullYear()
+      const m = dateStr.getMonth() + 1
+      const d = dateStr.getDate()
+      const hh = padZero(dateStr.getHours())
+      const mm = padZero(dateStr.getMinutes())
+      const ss = padZero(dateStr.getSeconds())
+      return `${y}-${m}-${d} ${hh}:${mm}:${ss}`
+    })
+    // 填充0函数
+    function padZero(str) {
+      return str > 9 ? str : '0' + str
+    }
+    const vm = new Vue({
+      el: '#app',
+      data: {
+        brandsList: [
+          { id: 1, brandNames: '宝马', status: true, createTime: new Date() },
+          { id: 2, brandNames: '玛莎拉蒂', status: true, createTime: new Date() },
+          { id: 3, brandNames: '奥迪', status: true, createTime: new Date() }
+        ],
+        brandName: '',
+        // 下一个品牌的ID
+        NextId: 4
+      },
+      methods: {
+        // 新增品牌的数据
+        addNewBrands() {
+          if (!this.brandName) return alert('品牌名称不能为空！')
+          else {
+            this.brandsList.push({
+              id: this.NextId,
+              brandNames: this.brandName,
+              status: true,
+              createTime: new Date()
+            })
+            // 重置品牌的名字
+            this.brandName = ''
+            // 让品牌的ID自增
+            this.NextId++
+          }
+        },
+        // 移除品牌的数据
+        removeBrand(id) {
+          this.brandsList = this.brandsList.filter(x => x.id !== id)
+        }
+      }
+    })
+  </script>
+</html>
